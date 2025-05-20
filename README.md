@@ -9,7 +9,9 @@ Two operation modes:
         Remediation test mode: Tracks remediation status of hosts
 
 # Requirements
+
 Python 3.6+
+
 sslscan command-line tool installed on your system
 
 # Installation
