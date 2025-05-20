@@ -11,6 +11,7 @@ Two operation modes:
 # Requirements
 
 -Python 3.6+
+
 -sslscan command-line tool installed on your system
 
 # Installation
