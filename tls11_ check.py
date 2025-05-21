@@ -2,6 +2,10 @@ import subprocess
 import concurrent.futures
 import os
 import re
+from colorama import Fore, Back, Style, init
+
+# Initialize colorama
+init(autoreset=True)
 
 DEFAULT_PORT = 443
 
@@ -17,7 +21,7 @@ def parse_target_line(line):
 
 def check_tls11(ip, port):
     try:
-        print(f"[+] Scanning {ip}:{port}")
+        print(f"{Fore.CYAN}[+] Scanning {ip}:{port}")
         result = subprocess.run(
             ["sslscan", "--no-colour", f"{ip}:{port}"],
             stdout=subprocess.PIPE,
@@ -29,13 +33,13 @@ def check_tls11(ip, port):
 
         # Look for the exact line indicating TLSv1.1 is enabled
         if "TLSv1.1   enabled" in output:
-            print(f"[!] TLSv1.1 ENABLED on {ip}:{port}")
+            print(f"{Fore.YELLOW}[!] TLSv1.1 ENABLED on {ip}:{port}")
             return (ip, port, True)
         else:
             return (ip, port, False)
 
     except Exception as e:
-        print(f"[!] Error scanning {ip}:{port}: {e}")
+        print(f"{Fore.RED}[!] Error scanning {ip}:{port}: {e}")
         return (ip, port, None)
 
 def load_targets(filename):
@@ -52,19 +56,19 @@ def print_basic_results(all_results):
     vulnerable_hosts = [(ip, port) for ip, port, is_vulnerable in all_results if is_vulnerable is True]
     non_vulnerable_hosts = [(ip, port) for ip, port, is_vulnerable in all_results if is_vulnerable is False]
 
-    print("\n[✓] Scan Results:\n")
+    print(f"\n{Fore.CYAN}{Style.BRIGHT}[✓] Scan Results:\n")
 
     if vulnerable_hosts:
-        print("[!] Hosts with TLSv1.1 ENABLED:\n")
+        print(f"{Fore.YELLOW}{Style.BRIGHT}[!] Hosts with TLSv1.1 ENABLED:\n")
         for ip, port in vulnerable_hosts:
-            print(f"    - {ip}:{port}")
+            print(f"{Fore.YELLOW}    - {ip}:{port}")
     else:
-        print("[✓] No hosts were found with TLSv1.1 enabled.")
+        print(f"{Fore.GREEN}{Style.BRIGHT}[✓] No hosts were found with TLSv1.1 enabled.")
 
     if non_vulnerable_hosts:
-        print("\n[+] Hosts with TLSv1.1 DISABLED:\n")
+        print(f"\n{Fore.GREEN}[+] Hosts with TLSv1.1 DISABLED:\n")
         for ip, port in non_vulnerable_hosts:
-            print(f"    - {ip}:{port}")
+            print(f"{Fore.GREEN}    - {ip}:{port}")
 
 def print_remediation_results(all_results):
     # Separate vulnerable and remediated hosts
@@ -78,22 +82,22 @@ def print_remediation_results(all_results):
             remediated_hosts.append((ip, port))
 
     # Print summary
-    print("\n[✓] Remediation Test Results:\n")
+    print(f"\n{Fore.CYAN}{Style.BRIGHT}[✓] Remediation Test Results:\n")
 
     if vulnerable_hosts:
-        print("[!] Hosts with TLSv1.1 still ENABLED:\n")
+        print(f"{Fore.YELLOW}{Style.BRIGHT}[!] Hosts with TLSv1.1 still ENABLED:\n")
         for ip, port in vulnerable_hosts:
-            print(f"    {ip}:{port} - NOT REMEDIATED")
+            print(f"{Fore.YELLOW}    {ip}:{port} - {Fore.RED}{Style.BRIGHT}NOT REMEDIATED")
 
     if remediated_hosts:
-        print("\n[+] Hosts with TLSv1.1 disabled:\n")
+        print(f"\n{Fore.GREEN}[+] Hosts with TLSv1.1 disabled:\n")
         for ip, port in remediated_hosts:
-            print(f"    {ip}:{port} - REMEDIATED")
+            print(f"{Fore.GREEN}    {ip}:{port} - {Fore.GREEN}{Style.BRIGHT}REMEDIATED")
 
     # Print overall statistics
-    print(f"\n[*] Total hosts scanned: {len(all_results)}")
-    print(f"[*] Hosts with TLSv1.1 enabled: {len(vulnerable_hosts)}")
-    print(f"[*] Hosts with TLSv1.1 disabled: {len(remediated_hosts)}")
+    print(f"\n{Fore.CYAN}[*] Total hosts scanned: {len(all_results)}")
+    print(f"{Fore.YELLOW}[*] Hosts with TLSv1.1 enabled: {len(vulnerable_hosts)}")
+    print(f"{Fore.GREEN}[*] Hosts with TLSv1.1 disabled: {len(remediated_hosts)}")
 
 if __name__ == "__main__":
     import argparse
@@ -106,7 +110,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     targets = load_targets(args.input)
-    print(f"[+] Loaded {len(targets)} targets from {args.input}")
+    print(f"{Fore.CYAN}[+] Loaded {len(targets)} targets from {args.input}")
 
     all_results = []
 
@@ -120,7 +124,7 @@ if __name__ == "__main__":
     # Check for any hosts that failed to scan
     failed_count = len(targets) - len(all_results)
     if failed_count > 0:
-        print(f"[!] Warning: {failed_count} hosts failed to scan properly")
+        print(f"{Fore.RED}[!] Warning: {failed_count} hosts failed to scan properly")
 
     # Display results based on selected mode
     if args.remediation_test:
