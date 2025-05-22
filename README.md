@@ -64,56 +64,79 @@ example.com:8443
 If no port is specified, the default port (443) will be used.
 	
 # Output Examples
-## Basic Scan Mode
 
 ```
-[+] Loaded 5 targets from targets.txt
-[+] Scanning 192.168.1.1:443
-[+] Scanning 192.168.1.2:443
-[!] TLSv1.1 ENABLED on 192.168.1.1:443
-[+] Scanning 192.168.1.3:443
-[+] Scanning 192.168.1.4:443
-[+] Scanning 192.168.1.5:443
+# Here's a sample output for the script when scanning multiple hosts for TLSv1.1 support
+
+[+] Loaded 8 targets from /home/user/targets.txt
+[+] Scanning 192.168.1.10:443
+[+] Scanning 192.168.1.11:443
+[+] Scanning 192.168.1.12:443
+[+] Scanning 192.168.1.13:443
+[+] Scanning 192.168.1.14:443
+[!] TLSv1.1 ENABLED on 192.168.1.11:443
+[+] Scanning 192.168.1.15:443
+[+] Scanning 192.168.1.16:443
+[+] Scanning 192.168.1.17:443
+[!] TLSv1.1 ENABLED on 192.168.1.15:443
 
 [✓] Scan Results:
 
 [!] Hosts with TLSv1.1 ENABLED:
-	- 192.168.1.1:443
-	- 192.168.1.3:443
+
+    - 192.168.1.11:443
+    - 192.168.1.15:443
 
 [+] Hosts with TLSv1.1 DISABLED:
-	- 192.168.1.2:443
-	- 192.168.1.4:443
-	- 192.168.1.5:443
- ```
-## Remediation Test Mode
 
-```
-[+] Loaded 5 targets from targets.txt
-[+] Scanning 192.168.1.1:443
-[+] Scanning 192.168.1.2:443
-[!] TLSv1.1 ENABLED on 192.168.1.1:443
-[+] Scanning 192.168.1.3:443
-[+] Scanning 192.168.1.4:443
-[+] Scanning 192.168.1.5:443
+    - 192.168.1.10:443
+    - 192.168.1.12:443
+    - 192.168.1.13:443
+    - 192.168.1.14:443
+    - 192.168.1.16:443
+    - 192.168.1.17:443
+	
+# And here's a sample output when running in remediation test mode (with the -r flag):
+
+[+] Loaded 8 targets from /home/user/targets.txt
+[+] Scanning 192.168.1.10:443
+[+] Scanning 192.168.1.11:443
+[+] Scanning 192.168.1.12:443
+[+] Scanning 192.168.1.13:443
+[+] Scanning 192.168.1.14:443
+[!] TLSv1.1 ENABLED on 192.168.1.11:443
+[+] Scanning 192.168.1.15:443
+[+] Scanning 192.168.1.16:443
+[+] Scanning 192.168.1.17:443
+[!] TLSv1.1 ENABLED on 192.168.1.15:443
 
 [✓] Remediation Test Results:
 
 [!] Hosts with TLSv1.1 still ENABLED:
 
-	192.168.1.1:443 - NOT REMEDIATED
-	192.168.1.3:443 - NOT REMEDIATED
+    192.168.1.11:443 - NOT REMEDIATED
+    192.168.1.15:443 - NOT REMEDIATED
 
 [+] Hosts with TLSv1.1 disabled:
 
-	192.168.1.2:443 - REMEDIATED
-	192.168.1.4:443 - REMEDIATED
-	192.168.1.5:443 - REMEDIATED
+    192.168.1.10:443 - REMEDIATED
+    192.168.1.12:443 - REMEDIATED
+    192.168.1.13:443 - REMEDIATED
+    192.168.1.14:443 - REMEDIATED
+    192.168.1.16:443 - REMEDIATED
+    192.168.1.17:443 - REMEDIATED
 
-[*] Total hosts scanned: 5
+[*] Total hosts scanned: 8
 [*] Hosts with TLSv1.1 enabled: 2
-[*] Hosts with TLSv1.1 disabled: 
+[*] Hosts with TLSv1.1 disabled: 6
+
+# If there's an error scanning a host, you might see something like:
+
+[+] Scanning 192.168.1.18:443
+[!] Error scanning 192.168.1.18:443: Command 'sslscan' returned non-zero exit status 1
+[!] Warning: 1 hosts failed to scan properly
 ```
+
 # License
 MIT License
 
