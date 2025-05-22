@@ -2,10 +2,14 @@ import subprocess
 import concurrent.futures
 import os
 import re
+import threading
 from colorama import Fore, Back, Style, init
 
 # Initialize colorama
 init(autoreset=True)
+
+# Add a lock for synchronized printing
+print_lock = threading.Lock()
 
 DEFAULT_PORT = 443
 
@@ -21,7 +25,10 @@ def parse_target_line(line):
 
 def check_tls11(ip, port):
     try:
-        print(f"{Fore.CYAN}[+] Scanning {ip}:{port}")
+        # Use the lock when printing to prevent output jumbling
+        with print_lock:
+            print(f"{Fore.CYAN}[+] Scanning {ip}:{port}")
+
         result = subprocess.run(
             ["sslscan", "--no-colour", f"{ip}:{port}"],
             stdout=subprocess.PIPE,
@@ -33,13 +40,15 @@ def check_tls11(ip, port):
 
         # Look for the exact line indicating TLSv1.1 is enabled
         if "TLSv1.1   enabled" in output:
-            print(f"{Fore.YELLOW}[!] TLSv1.1 ENABLED on {ip}:{port}")
+            with print_lock:
+                print(f"{Fore.YELLOW}[!] TLSv1.1 ENABLED on {ip}:{port}")
             return (ip, port, True)
         else:
             return (ip, port, False)
 
     except Exception as e:
-        print(f"{Fore.RED}[!] Error scanning {ip}:{port}: {e}")
+        with print_lock:
+            print(f"{Fore.RED}[!] Error scanning {ip}:{port}: {e}")
         return (ip, port, None)
 
 def load_targets(filename):
@@ -110,7 +119,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     targets = load_targets(args.input)
-    print(f"{Fore.CYAN}[+] Loaded {len(targets)} targets from {args.input}")
+
+    with print_lock:
+        print(f"{Fore.CYAN}[+] Loaded {len(targets)} targets from {args.input}")
 
     all_results = []
 
@@ -124,7 +135,8 @@ if __name__ == "__main__":
     # Check for any hosts that failed to scan
     failed_count = len(targets) - len(all_results)
     if failed_count > 0:
-        print(f"{Fore.RED}[!] Warning: {failed_count} hosts failed to scan properly")
+        with print_lock:
+            print(f"{Fore.RED}[!] Warning: {failed_count} hosts failed to scan properly")
 
     # Display results based on selected mode
     if args.remediation_test:
